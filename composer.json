@@ -1,10 +1,10 @@
 {
-	"name": "hariadi/isms",
+	"name": "hariadi/sms",
 	"description": "PHP implementation of SMS Service in Malaysia",
 	"version": "0.1.0",
 	"type": "library",
 	"keywords": ["sms", "isms"],
-	"homepage": "https://github.com/hariadi/isms",
+	"homepage": "https://github.com/hariadi/sms",
 	"license": "MIT",
 	"authors": [
 		{
@@ -14,8 +14,8 @@
 		}
 	],
 	"support": {
-		"issues": "https://github.com/hariadi/isms/issues",
-		"source": "https://github.com/hariadi/isms"
+		"issues": "https://github.com/hariadi/sms/issues",
+		"source": "https://github.com/hariadi/sms"
 	},
 	"require": {
 		"php": ">=5.3.0"

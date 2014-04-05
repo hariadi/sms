@@ -1,7 +1,7 @@
 {
 	"name": "hariadi/sms",
 	"description": "PHP implementation of SMS Service in Malaysia",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"type": "library",
 	"keywords": ["sms", "isms"],
 	"homepage": "https://github.com/hariadi/sms",

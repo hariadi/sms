@@ -10,19 +10,23 @@
  * @version 0.1.0
  */
 
-namespace Isms;
+//namespace Isms;
 
-class isms
+class Isms
 {
 	const VERSION  = '0.1.0';
-	const HOST     = 'http://isms.com.my/';
-	const SEND     = 'isms_sendsend.php?';
+	const HOST     = 'https://isms.com.my/';
+	const SEND     = 'isms_send.php?';
 	const BALANCE  = 'isms_balance.php?';
 	const SCHEDULE = 'isms_scheduler.php?';
 
 	private $_login;
 	private $_password;
 	private $_auth;
+	private $_sender;
+	private $_message;
+	private $_type;
+	private $_sms;
 	protected $to = array();
 	protected $response_code = array(
 		'2000' => 'SUCCESS - Message Sent.',
@@ -41,12 +45,24 @@ class isms
 	{
 		$this->_login = $login;
 		$this->_password = $pwd;
+		$this->_sender ='63633';
+		$this->_type = 1;
 		$this->_auth = $this->getAuthParams();
 	}
 
-	public function addNumber($number)
+	public function setNumber($number)
   {
     return $this->addAnNumber($number);
+  }
+
+  public function setMessage($msg)
+  {
+    return $this->_message = rawurlencode($msg);
+  }
+
+  public function getMessage()
+  {
+    return $this->_message;
   }
 
   public function getNumber()
@@ -54,31 +70,31 @@ class isms
     return $this->_to;
   }
 
+  public function viewSMSParams()
+  {
+    return $this->getSMSParams();
+  }
+
   public function normalize($number)
   {
     return $this->normalizeNumber($number);
   }
 
-	public function send( $dstno, $msg, $type = 1, $sender = 63633 )
+	public function send()
 	{
 		$url = self::HOST . self::SEND;
 		$params = $this->_auth;
 
-		if ( $dstno ) {
-			$params['dstno'] = is_array($dstno) ? $this->formatNumber($dstno) : $dstno;
-		}
-
-		if ( $msg ) {
-			$params['msg'] = $msg;
-		}
-
-		$params['type'] = $type;
-		$params['sendid'] = $sender;
+		$params['dstno'] = is_array($this->_to) ? $this->formatNumber($this->_to) : $this->_to;
+		$params['msg'] = $this->_message;
+		$params['type'] = $this->_type;
+		$params['sendid'] = $this->_sender;
 
 		$result = $this->curl( $url, $params );
 
 		$response = array();
-		$response['code'] = getInfo($result);
+		$response['raw'] = $result;
+		$response['code'] = $this->getInfo($result);
 		$response['description'] = $this->getAnswer( $response['code'] );
 
 		return $response;
@@ -89,13 +105,20 @@ class isms
 		$url = self::HOST . self::BALANCE;
 		$params = $this->_auth;
 		$result = $this->curl( $url, $params );
-		return getInfo($result);
+		return $this->getInfo($result);
 	}
 
 	private function addAnNumber($number)
 	{
-		$number = $this->normalizeNumber($number);
-		$this->_to[] = $number;
+		if (is_array($number)) {
+			foreach ($number as $num)
+	    {
+	      $this->_to[] = $num;
+	    }
+		} else {
+			$this->_to[] = $number;
+		}
+		
 	}
 
 	private function normalizeNumber($number, $countryCode = 60)
@@ -127,8 +150,17 @@ class isms
 
 	private function getAuthParams()
 	{
-		$params['login'] = $this->_login;
-		$params['password'] = $this->_password;
+		$params['un'] = $this->_login;
+		$params['pwd'] = $this->_password;
+		return $params;
+	}
+
+	private function getSMSParams()
+	{		
+		$params['dstno'] = $this->formatNumber($this->_to);
+		$params['type'] = $this->_type;
+		$params['msg'] = $this->_message;
+		$params['sendid'] = $this->_sender;
 		return $params;
 	}
 
@@ -145,7 +177,7 @@ class isms
 		$ch = curl_init();
 		$options = array(
     	CURLOPT_RETURNTRANSFER => TRUE,
-    	CURLOPT_URL => $link,
+    	CURLOPT_URL => $url,
     	CURLOPT_HEADER         => false,
     	CURLOPT_ENCODING       => "",
     	CURLOPT_POST            => 1,
